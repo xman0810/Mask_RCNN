@@ -1876,7 +1876,7 @@ class MaskRCNN():
 
         # Inputs
         input_image = KL.Input(
-            shape=[None, None, config.IMAGE_SHAPE[2]], name="input_image")
+            shape=[h, w, config.IMAGE_SHAPE[2]], name="input_image")
         input_image_meta = KL.Input(shape=[config.IMAGE_META_SIZE],
                                     name="input_image_meta")
         if mode == "training":
@@ -1910,7 +1910,8 @@ class MaskRCNN():
                     name="input_gt_masks", dtype=bool)
         elif mode == "inference":
             # Anchors in normalized coordinates
-            input_anchors = KL.Input(shape=[None, 4], name="input_anchors")
+            anchors_data = self.get_anchors(config.IMAGE_SHAPE)
+            input_anchors = KL.Input(shape=anchors_data.shape, name="input_anchors")
 
         # Build the shared convolutional layers.
         # Bottom-up Layers
