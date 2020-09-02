@@ -2075,9 +2075,14 @@ class MaskRCNN():
                                               config.NUM_CLASSES,
                                               train_bn=config.TRAIN_BN)
 
+            reshape_mrcnn_class = K.reshape(mrcnn_class, (-1, 1000, 81))
+            reshape_mrcnn_bbox = K.reshape(mrcnn_bbox, (-1, 4, 1000, 81))
+            reshape_rpn_rois = K.reshape(rpn_rois, (-1, 1000, 4))
+            reshape_rpn_class = K.reshape(rpn_class, (-1, 261888, 2))
+            reshape_rpn_bbox = K.reshape(rpn_bbox, (-1, 261888, 4))
             model = KM.Model([input_image, input_image_meta, input_anchors],
-                             [detections, mrcnn_class, mrcnn_bbox,
-                                 mrcnn_mask, rpn_rois, rpn_class, rpn_bbox],
+                             [detections, reshape_mrcnn_class, reshape_mrcnn_bbox,
+                                 mrcnn_mask, reshape_rpn_rois, reshape_rpn_class, reshape_rpn_bbox],
                              name='mask_rcnn')
 
         # Add multi-GPU support.
@@ -2547,8 +2552,16 @@ class MaskRCNN():
             log("image_metas", image_metas)
             log("anchors", anchors)
         # Run object detection
-        detections, _, _, mrcnn_mask, _, _, _ =\
+        detections, res1, res2, mrcnn_mask, res4, res5, res6 =\
             self.keras_model.predict([molded_images, image_metas, anchors], verbose=0)
+        print(detections.shape)
+        print(res1.shape)
+        print(res2.shape)
+        print(mrcnn_mask.shape)
+        print(res4.shape)
+        print(res5.shape)
+        print(res6.shape)
+        print("next detect")
         # Process detections
         results = []
         for i, image in enumerate(images):
@@ -2604,7 +2617,7 @@ class MaskRCNN():
             log("image_metas", image_metas)
             log("anchors", anchors)
         # Run object detection
-        detections, _, _, mrcnn_mask, _, _, _ =\
+        detections, res1, res2, mrcnn_mask, res4, res5, res6 =\
             self.keras_model.predict([molded_images, image_metas, anchors], verbose=0)
         # Process detections
         results = []
